@@ -1,11 +1,10 @@
 /*
- * A simple chess AI, by someone who doesn't know how to play chess.
+ * A modified version of the code produced by Zhang Zeyu.
  * Uses the chessboard.js and chess.js libraries.
+ * For more info go to: https://github.com/zeyu2001/chess-ai
  *
- * Copyright (c) 2020 Zhang Zeyu
  */
 
-var STACK_SIZE = 100; // maximum size of undo stack
 
 var board = null;
 var $board = $('#myBoard');
@@ -504,74 +503,7 @@ $('#resetBtn').on('click', function () {
   reset();
 });
 
-var undo_stack = [];
 
-function undo() {
-  var move = game.undo();
-  undo_stack.push(move);
-
-  // Maintain a maximum stack size
-  if (undo_stack.length > STACK_SIZE) {
-    undo_stack.shift();
-  }
-  board.position(game.fen());
-}
-
-$('#undoBtn').on('click', function () {
-  if (game.history().length >= 2) {
-    $board.find('.' + squareClass).removeClass('highlight-white');
-    $board.find('.' + squareClass).removeClass('highlight-black');
-    $board.find('.' + squareClass).removeClass('highlight-hint');
-
-    // Undo twice: Opponent's latest move, followed by player's latest move
-    undo();
-    window.setTimeout(function () {
-      undo();
-      window.setTimeout(function () {
-        showHint();
-      }, 250);
-    }, 250);
-  } else {
-    alert('Nothing to undo.');
-  }
-});
-
-function redo() {
-  game.move(undo_stack.pop());
-  board.position(game.fen());
-}
-
-$('#redoBtn').on('click', function () {
-  if (undo_stack.length >= 2) {
-    // Redo twice: Player's last move, followed by opponent's last move
-    redo();
-    window.setTimeout(function () {
-      redo();
-      window.setTimeout(function () {
-        showHint();
-      }, 250);
-    }, 250);
-  } else {
-    alert('Nothing to redo.');
-  }
-});
-
-$('#showHint').change(function () {
-  window.setTimeout(showHint, 250);
-});
-
-function showHint() {
-  var showHint = document.getElementById('showHint');
-  $board.find('.' + squareClass).removeClass('highlight-hint');
-
-  // Show hint (best move for white)
-  if (showHint.checked) {
-    var move = getBestMove(game, 'w', -globalSum)[0];
-
-    $board.find('.square-' + move.from).addClass('highlight-hint');
-    $board.find('.square-' + move.to).addClass('highlight-hint');
-  }
-}
 
 /*
  * The remaining code is adapted from chessboard.js examples #5000 through #5005:
@@ -606,7 +538,6 @@ function onDragStart(source, piece) {
 }
 
 function onDrop(source, target) {
-  undo_stack = [];
   removeGreySquares();
   renderMoveHistory(game.history());
   // see if the move is legal
